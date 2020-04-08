@@ -33,7 +33,6 @@ public class Stations {
             int i = 0;
 
             while (s.hasNextLine()) {
-//                System.out.println(String.valueOf(i + 1) + " Station Name : \t" + s.nextLine());
                 if (db.addStation(s.nextLine())) {
                     i++;
                 }
@@ -90,14 +89,5 @@ public class Stations {
             }
         }
     }
-
-    //End Inserting Test Values
-    public boolean insertData() {
-
-        StationDB db = new StationDB();
-        db.addStation("station 1");
-
-        return false;
-    }
-
+    
 }

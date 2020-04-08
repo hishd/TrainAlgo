@@ -5,6 +5,7 @@
  */
 package trainalgo;
 
+import trainalgo.stations.Dataset;
 import trainalgo.stations.Stations;
 
 /**
@@ -17,10 +18,18 @@ public class TrainAlgo {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
-        Stations s = new Stations();
         
-        s.linkSampleData(200); //200 = no of random links
+//        Stations s = new Stations();
+//        
+//        s.linkSampleData(200); //200 = no of random links
+
+          try{
+                Dataset ds = new Dataset();
+                ds.initStationInfoDatastruct();
+          }catch(Exception e){
+              e.printStackTrace();
+          }
+          
     }
     
 }

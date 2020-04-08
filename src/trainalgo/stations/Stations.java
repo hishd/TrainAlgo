@@ -8,11 +8,9 @@ package trainalgo.stations;
 import DB.StationDB;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
-import javafx.util.Pair;
 
 /**
  *
@@ -24,6 +22,7 @@ public class Stations {
     //Inserting Test Values
     private String fileName = "stations.txt";
 
+    //inserting some sample data fetched from a txt file
     public void insertSampleData() {
         File file = new File(fileName);
 
@@ -33,7 +32,6 @@ public class Stations {
             int i = 0;
 
             while (s.hasNextLine()) {
-//                System.out.println(String.valueOf(i + 1) + " Station Name : \t" + s.nextLine());
                 if (db.addStation(s.nextLine())) {
                     i++;
                 }
@@ -57,7 +55,7 @@ public class Stations {
         StationDB db = new StationDB();
         Random rand = new Random();
         int stationA, stationB;
-        int stationCount = db.getStationCount();
+        int stationCount = db.getLastStationID();
         int generatedLinksCount = 0;
 
         if (stationCount < 1) {
@@ -75,7 +73,7 @@ public class Stations {
                 stationA = rand.nextInt(stationCount);
                 stationB = rand.nextInt(stationCount);
 
-                while (stationA == stationB || insertedStations.contains(String.valueOf(stationA) + String.valueOf(stationB))) {
+                while (stationA==0 || stationB==0 ||stationA == stationB || insertedStations.contains(String.valueOf(stationA) + String.valueOf(stationB))) {
                     stationA = rand.nextInt(stationCount);
                     stationB = rand.nextInt(stationCount);
                     System.out.println("GENERATING");
@@ -84,20 +82,11 @@ public class Stations {
                 insertedStations.add(String.valueOf(stationA) + String.valueOf(stationB));
                 insertedStations.add(String.valueOf(stationB) + String.valueOf(stationA));
 
-                db.addStationLink(stationA, stationB);
+                db.addStationLink(stationA, stationB, rand.nextInt(100)+5);
 
                 generatedLinksCount++;
             }
         }
     }
-
-    //End Inserting Test Values
-    public boolean insertData() {
-
-        StationDB db = new StationDB();
-        db.addStation("station 1");
-
-        return false;
-    }
-
+    
 }

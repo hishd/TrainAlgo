@@ -6,9 +6,6 @@
 package DB;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -26,6 +23,8 @@ public class StationDB {
     Connection conn;
     PreparedStatement ps;
 
+    
+    //Initialize connection with DB
     public void initCon() {
         try {
             System.out.println("Connecting to database...");
@@ -38,6 +37,7 @@ public class StationDB {
         }
     }
 
+    //Add new Train Station information to DB
     public boolean addStation(String stationName) {
         if (conn == null) {
             initCon();
@@ -66,13 +66,15 @@ public class StationDB {
         }
         return false;
     }
+
     
-    public boolean addStationLink(int stationA, int stationB) {
+    //Add a link between Train Stations
+    public boolean addStationLink(int stationA, int stationB, int distance) {
         if (conn == null) {
             initCon();
         }
         try {
-            ps = conn.prepareStatement("INSERT INTO tbl_connections(station_1,station_2) VALUES(" + stationA + "," + stationB + ")");
+            ps = conn.prepareStatement("INSERT INTO tbl_connections(station_1,station_2,distance) VALUES(" + stationA + "," + stationB + "," + distance + ")");
             if (ps.executeUpdate() > 0) {
                 System.out.println(stationA + " and " + stationB + " link established");
                 return true;
@@ -95,18 +97,19 @@ public class StationDB {
         }
         return false;
     }
-    
-    public int getStationCount(){
+
+    //Retrieves the last station ID from DB
+    public int getLastStationID() {
         ResultSet rs = null;
 
         if (conn == null) {
             initCon();
         }
         try {
-            ps = conn.prepareStatement("SELECT COUNT(*) AS rowcount FROM tbl_stations");
+            ps = conn.prepareStatement("SELECT station_id FROM tbl_stations ORDER BY station_id DESC LIMIT 1");
             rs = ps.executeQuery();
             rs.next();
-            return rs.getInt("rowcount");
+            return rs.getInt(1);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -125,28 +128,16 @@ public class StationDB {
         return 0;
     }
 
-    public ArrayList<String> retriveAllStations() {
-
-        ResultSet rs = null;
-        ArrayList<String> stations = new ArrayList<>();
-
+    //Retrieve all Train Station information from DB
+    public ResultSet retriveAllStationsInfo() {
         if (conn == null) {
             initCon();
         }
         try {
-            ps = conn.prepareStatement("SELECT * FROM tbl_stations");
-            rs = ps.executeQuery();
-            
-            while(rs.next())
-                stations.add(rs.getString(0));
-            
-            return stations;
+            ps = conn.prepareStatement("SELECT station_id,station_name FROM tbl_stations ORDER BY station_id ASC");
+            return ps.executeQuery();
 
         } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
             if (conn != null) {
                 try {
                     conn.close();
@@ -155,8 +146,36 @@ public class StationDB {
                     ex.printStackTrace();
                 }
             }
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return stations;
+        return null;
+    }
+
+    //Retrieve all Train Station links from DB
+    public ResultSet retriveAllStationLinks() {
+        if (conn == null) {
+            initCon();
+        }
+        try {
+            ps = conn.prepareStatement("SELECT station_1,station_2,distance FROM tbl_connections");
+            return ps.executeQuery();
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.close();
+                    conn = null;
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }
