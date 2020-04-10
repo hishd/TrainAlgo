@@ -5,7 +5,8 @@
  */
 package trainalgo;
 
-import Dijkstra.Algo;
+import Dijkstra.DijkstraAlgo;
+import Prims.PrimsAlgo;
 import java.util.ArrayList;
 import trainalgo.stations.Dataset;
 import trainalgo.stations.Stations;
@@ -41,24 +42,29 @@ public class TrainAlgo {
 //            ds.removeStationPathInDatastructure("Kurana", "Negombo");
 
             /*Creating a object from Algorithm (Djkstra) class with passing the Station information and Station links graph(paths,edges)*/
-            Algo algo = new Algo(ds.getStationPaths(), ds.getStationDataTreeMap());
+//            DijkstraAlgo algo = new DijkstraAlgo(ds.getStationPaths(), ds.getStationDataTreeMap());
             /*Applying the Dijkstra algorithm to the station paths data structure with passing the source(start) station*/
-            algo.applyDijkstra(ds.retrieveStationID("Ganemulla"));
+//            algo.applyDijkstra(ds.retrieveStationID("Ganemulla"));
             /*Retrieving the returned arraylist which contains the shortest path from source (start) station to destination station
             with using an arraylist, getShortestPath() will be called by passing the destination station*/
-            ArrayList<String> shortestPath = algo.getShortestPath(ds.retrieveStationID("Kadigamuwa"));
+//            ArrayList<String> shortestPath = algo.getShortestPath(ds.retrieveStationID("Kadigamuwa"));
 
             /*Displaying all paths(shortest path)*/
-            System.out.println("\n\n==PATHS==\n");
+//            System.out.println("\n\n==PATHS==\n");
 
-            shortestPath.forEach((path) -> {
-                System.out.println(path);
-            });
+//            shortestPath.forEach((path) -> {
+//                System.out.println(path);
+//            });
             
             /*Displaying total distance(shortest path distance)*/
-            System.out.println("Shortest Distance : " + String.valueOf(algo.getShortestDistance()));
+//            System.out.println("Shortest Distance : " + String.valueOf(algo.getShortestDistance()));
             
             /*The shortestPath ArrayList contains the shortest path from source station to the destination station*/
+            
+            /*Testing Code snippet of prims algorithm*/
+            PrimsAlgo primsAlgo = new PrimsAlgo(ds.getStationPaths());
+            primsAlgo.applyPrims();
+            primsAlgo.getMinimumConnectors();
 
         } catch (Exception e) {
             e.printStackTrace();

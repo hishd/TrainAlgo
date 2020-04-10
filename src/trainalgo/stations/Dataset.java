@@ -148,6 +148,8 @@ public class Dataset {
         while (rs.next()) {
             stationPaths[rs.getInt(1)][rs.getInt(2)] = rs.getInt(3);
         }
+        
+        
 
         //Test Code Snippet, Get all links with distance
 //        for (int row = 0; row < stationPaths.length; row++) {

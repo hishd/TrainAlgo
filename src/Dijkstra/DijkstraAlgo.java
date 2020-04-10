@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * @author Hishara
  */
-public class Algo {
+public class DijkstraAlgo {
 
     private int vertices;
     private int distances[];
@@ -22,15 +22,18 @@ public class Algo {
     Map<Integer, String> trainStationInfo;
     ArrayList<String> shortestPath;
     int shortestDistance = -1;
+    long startTime;
+    long endTime;
 
-    public Algo(int dataSetGraph[][], Map<Integer, String> trainStationInfo) {
+    public DijkstraAlgo(int dataSetGraph[][], Map<Integer, String> trainStationInfo) {
         this.dataSetGraph = dataSetGraph;
         this.trainStationInfo = trainStationInfo;
     }
 
     //main algorithm
     public void applyDijkstra(int sourceStation) {
-
+        //getting the current time in nanoseconds
+        startTime = System.nanoTime();
         //retrieving the number of vertices in the data set to travel each iteration
         vertices = dataSetGraph.length;
         //this array will hold the shortest distances from source to destimation
@@ -96,6 +99,11 @@ public class Algo {
             }
 
         }
+        
+        //getting the end time in nanoseconds
+        endTime = System.nanoTime();
+        
+        System.out.println("\n\n==Time Duration for Dijkstra Execution : " + (endTime-startTime) + " nanoseconds==\n\n");
 
     }
     
@@ -104,9 +112,14 @@ public class Algo {
     }
     
     public ArrayList<String> getShortestPath(int destinationStation){
+        //getting the current time in nanoseconds
+        startTime = System.nanoTime();
         shortestDistance = distances[destinationStation];
         shortestPath = new ArrayList<>();
         findShortestPath(destinationStation);
+        //getting the end time in nanoseconds
+        endTime = System.nanoTime();
+        System.out.println("\n\n==Time Duration for Retrirving Shortest Path : nanoseconds" + (endTime-startTime) + " ==\n\n");
         return shortestPath;
     }
 
