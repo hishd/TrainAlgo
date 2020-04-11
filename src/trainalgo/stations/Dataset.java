@@ -26,6 +26,9 @@ public class Dataset {
     StationDB stationDB;
     ResultSet rs;
     int lastStationID = 0;
+    long startTime;
+    long endTime;
+    long executionTime;
 
     /*
     *
@@ -37,10 +40,15 @@ public class Dataset {
         stationDataTreeMap = new TreeMap<>();
         stationDB = new StationDB();
         rs = stationDB.retriveAllStationsInfo();
-
+        //getting the current time in nanoseconds
+        startTime = System.nanoTime();
         while (rs.next()) {
             stationDataTreeMap.put(rs.getInt(1), rs.getString(2));
         }
+        //getting the end time in nanoseconds
+        endTime = System.nanoTime();
+        executionTime = endTime - startTime;
+        System.out.println("\n\n==Time Duration for Loading information to Dataset: " + (executionTime) + " nanoseconds==\n\n");
 
         //Test Code Snippet, Get all station information
 //        for (Map.Entry<Integer, String> entry : stationDataTreeMap.entrySet()) {
@@ -56,6 +64,10 @@ public class Dataset {
         return stationDataTreeMap;
     }
 
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
     //adding new Station Information to application data structure and adding the new information to DB
     public boolean addStationToStationInfoDatastruct(String StationName) throws SQLException {
         if (stationDataTreeMap == null) {
@@ -68,7 +80,13 @@ public class Dataset {
 
         int stationID = lastStationID != 0 ? lastStationID + 1 : stationDB.getLastStationID() + 1;
 
+        //getting the current time in nanoseconds
+        startTime = System.nanoTime();
         stationDataTreeMap.put(stationID, StationName);
+        //getting the end time in nanoseconds
+        endTime = System.nanoTime();
+        executionTime = endTime - startTime;
+        System.out.println("\n\n==Time Duration for Inserting information to Dataset: " + (executionTime) + " nanoseconds==\n\n");
 
         //Test Code Snippet, Get all station information
 //        for (Map.Entry<Integer, String> entry : stationDataTreeMap.entrySet()) {
@@ -94,9 +112,13 @@ public class Dataset {
         if (stationDB == null) {
             stationDB = new StationDB();
         }
-
+        //getting the current time in nanoseconds
+        startTime = System.nanoTime();
         stationDataTreeMap.put(stationID, newStation);
-
+        //getting the end time in nanoseconds
+        endTime = System.nanoTime();
+        executionTime = endTime - startTime;
+        System.out.println("\n\n==Time Duration for Updating information in Dataset: " + (executionTime) + " nanoseconds==\n\n");
         return stationDB.updateStation(stationID, newStation);
     }
 
@@ -116,9 +138,13 @@ public class Dataset {
         if (lastStationID == 0) {
             lastStationID = stationDB.getLastStationID();
         }
-
+        //getting the current time in nanoseconds
+        startTime = System.nanoTime();
         stationDataTreeMap.remove(stationID, stationName);
-
+        //getting the end time in nanoseconds
+        endTime = System.nanoTime();
+        executionTime = endTime - startTime;
+        System.out.println("\n\n==Time Duration for Deleting information in Dataset: " + (executionTime) + " nanoseconds==\n\n");
         return stationDB.removeStation(stationID);
     }
 
@@ -139,6 +165,8 @@ public class Dataset {
 
         rs = stationDB.retriveAllStationLinks();
 
+        //getting the current time in nanoseconds
+        startTime = System.nanoTime();
         for (int row = 0; row < stationPaths.length; row++) {
             for (int col = 0; col < stationPaths[row].length; col++) {
                 stationPaths[row][col] = 0;
@@ -148,8 +176,11 @@ public class Dataset {
         while (rs.next()) {
             stationPaths[rs.getInt(1)][rs.getInt(2)] = rs.getInt(3);
         }
-        
-        
+
+        //getting the end time in nanoseconds
+        endTime = System.nanoTime();
+        executionTime = endTime - startTime;
+        System.out.println("\n\n==Time Duration for Loading information to Dataset: " + (executionTime) + " nanoseconds==\n\n");
 
         //Test Code Snippet, Get all links with distance
 //        for (int row = 0; row < stationPaths.length; row++) {
@@ -188,8 +219,13 @@ public class Dataset {
         if (stationDB == null) {
             stationDB = new StationDB();
         }
-
+        //getting the current time in nanoseconds
+        startTime = System.nanoTime();
         stationPaths[stationAID][stationBID] = distance;
+        //getting the end time in nanoseconds
+        endTime = System.nanoTime();
+        executionTime = endTime - startTime;
+        System.out.println("\n\n==Time Duration for Inserting information to Dataset: " + (executionTime) + " nanoseconds==\n\n");
 
         //Test Code Snippet, Get all links with distance
 //        for (int row = 0; row < stationPaths.length; row++) {
@@ -221,8 +257,13 @@ public class Dataset {
         if (stationDB == null) {
             stationDB = new StationDB();
         }
-
+        //getting the current time in nanoseconds
+        startTime = System.nanoTime();
         stationPaths[stationAID][stationBID] = distance;
+        //getting the end time in nanoseconds
+        endTime = System.nanoTime();
+        executionTime = endTime - startTime;
+        System.out.println("\n\n==Time Duration for Updating information in Dataset: " + (executionTime) + " nanoseconds==\n\n");
 
         //Test Code Snippet, Get all links with distance
 //        for (int row = 0; row < stationPaths.length; row++) {
@@ -251,7 +292,13 @@ public class Dataset {
             return false;
         }
 
+        //getting the current time in nanoseconds
+        startTime = System.nanoTime();
         stationPaths[stationAID][stationBID] = 0;
+        //getting the end time in nanoseconds
+        endTime = System.nanoTime();
+        executionTime = endTime - startTime;
+        System.out.println("\n\n==Time Duration for Deleting information in Dataset: " + (executionTime) + " nanoseconds==\n\n");
 
         //Test Code Snippet, Get all links with distance
 //        for (int row = 0; row < stationPaths.length; row++) {

@@ -270,6 +270,14 @@ public class StationDB {
             }
             e.printStackTrace();
         } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.close();
+                    conn = null;
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
             e.printStackTrace();
         }
         return null;
@@ -295,6 +303,14 @@ public class StationDB {
             }
             e.printStackTrace();
         } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.close();
+                    conn = null;
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
             e.printStackTrace();
         }
         return null;

@@ -24,6 +24,7 @@ public class DijkstraAlgo {
     int shortestDistance = -1;
     long startTime;
     long endTime;
+    long executedTime;
 
     public DijkstraAlgo(int dataSetGraph[][], Map<Integer, String> trainStationInfo) {
         this.dataSetGraph = dataSetGraph;
@@ -102,8 +103,8 @@ public class DijkstraAlgo {
         
         //getting the end time in nanoseconds
         endTime = System.nanoTime();
-        
-        System.out.println("\n\n==Time Duration for Dijkstra Execution : " + (endTime-startTime) + " nanoseconds==\n\n");
+        executedTime = endTime-startTime;
+        System.out.println("\n\n==Time Duration for Dijkstra Execution : " + (executedTime) + " nanoseconds==\n\n");
 
     }
     

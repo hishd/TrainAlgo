@@ -15,6 +15,7 @@ public class PrimsAlgo {
     int mst[];
     long startTime;
     long endTime;
+    long executedTime;
 
     public PrimsAlgo(int dataSetGraph[][]) {
         this.dataSetGraph = dataSetGraph;
@@ -91,8 +92,8 @@ public class PrimsAlgo {
         
         //getting the end time in nanoseconds
         endTime = System.nanoTime();
-        
-        System.out.println("\n\n==Time Duration for Prims Execution : " + (endTime-startTime) + " nanoseconds==\n\n");
+        executedTime = endTime-startTime;
+        System.out.println("\n\n==Time Duration for Prims Execution : " + (executedTime) + " nanoseconds==\n\n");
     }
 
     public int getMinimumConnectors() {

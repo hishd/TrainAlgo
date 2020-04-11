@@ -7,6 +7,7 @@ package trainalgo;
 
 import Dijkstra.DijkstraAlgo;
 import Prims.PrimsAlgo;
+import UI.MainMenu;
 import java.util.ArrayList;
 import trainalgo.stations.Dataset;
 import trainalgo.stations.Stations;
@@ -29,14 +30,14 @@ public class TrainAlgo {
 //        s.linkSampleData(200); //200 = no of random links
         try {
 
-            Dataset ds = new Dataset();
-            ds.initStationInfoDatastruct();
+//            Dataset ds = new Dataset();
+//            ds.initStationInfoDatastruct();
 //            ds.addStationToStationInfoDatastruct("New Station 2");
 //            ds.updateStationInStationInfoDatastruct("New Station", "B new Station");
 //            ds.removeStationInStationInfoDatastructure("New Station 3");
 //            ds.addStationToStationInfoDatastruct("New Station 4");
 
-            ds.initStationPathDatastruct();
+//            ds.initStationPathDatastruct();
 //            ds.addStationPathToDataStruct("Kurana", "Negombo", 100);
 //            ds.updateStationPathInDataStructure("Kurana", "Negombo", 50);
 //            ds.removeStationPathInDatastructure("Kurana", "Negombo");
@@ -62,9 +63,12 @@ public class TrainAlgo {
             /*The shortestPath ArrayList contains the shortest path from source station to the destination station*/
             
             /*Testing Code snippet of prims algorithm*/
-            PrimsAlgo primsAlgo = new PrimsAlgo(ds.getStationPaths());
-            primsAlgo.applyPrims();
-            primsAlgo.getMinimumConnectors();
+//            PrimsAlgo primsAlgo = new PrimsAlgo(ds.getStationPaths());
+//            primsAlgo.applyPrims();
+//            primsAlgo.getMinimumConnectors();
+              
+              //Run GUI
+              new MainMenu().setVisible(true);
 
         } catch (Exception e) {
             e.printStackTrace();
