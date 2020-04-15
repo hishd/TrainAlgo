@@ -5,17 +5,60 @@
  */
 package UI;
 
+import Dijkstra.DijkstraAlgo;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Map;
+import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
+import trainalgo.stations.Dataset;
+
 /**
  *
  * @author Hishara
  */
 public class ClosestRoutes extends javax.swing.JFrame {
 
+    int selectedTextIndex = 0;
+    Dataset ds;
+    DefaultListModel<String> defaultListModel;
+    private static Map<Integer, String> stationDataTreeMap;
+    private int[][] stationPaths;
+    private DijkstraAlgo dijkstraAlgo;
+    private ArrayList<String> shortestPath;
+    private String path;
     /**
      * Creates new form ClosestRoutes
      */
     public ClosestRoutes() {
         initComponents();
+        initStationDataStruct();
+    }
+    
+    private void initStationDataStruct(){
+        System.out.println("Initializing Data Structures");
+        ds = new Dataset();
+        try{
+            ds.initStationPathDatastruct();
+            stationPaths = ds.getStationPaths();
+            if (stationPaths == null && stationPaths.length == 0) {
+                JOptionPane.showMessageDialog(this, "Data set is empty", "Exception", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            txtExecutionTime.setText(String.valueOf(ds.getExecutionTime()));
+            ds.initStationInfoDatastruct();
+            stationDataTreeMap = ds.getStationDataTreeMap();
+            defaultListModel = new DefaultListModel<>();
+            lstStationNames.setModel(defaultListModel);
+            for (Map.Entry<Integer, String> entry : stationDataTreeMap.entrySet()) {
+                defaultListModel.addElement(entry.getValue());
+            }
+            dijkstraAlgo = new DijkstraAlgo(stationPaths, stationDataTreeMap);
+        }catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "SQL Error : " + e.getMessage(), "Exception", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Exception", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -32,20 +75,19 @@ public class ClosestRoutes extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         txtStationA = new javax.swing.JTextField();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
         btnFindPaths = new javax.swing.JButton();
-        btnLoadData = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         jPanel55 = new javax.swing.JPanel();
         jPanel54 = new javax.swing.JPanel();
         btnClose26 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        txtClosestPath = new javax.swing.JTextArea();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         txtExecutionTime = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        lstStationNames = new javax.swing.JList<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
@@ -56,7 +98,11 @@ public class ClosestRoutes extends javax.swing.JFrame {
         txtStationB.setEditable(false);
         txtStationB.setBackground(new java.awt.Color(255, 255, 255));
         txtStationB.setForeground(new java.awt.Color(102, 102, 102));
-        txtStationB.setText("Station B");
+        txtStationB.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                txtStationBMouseClicked(evt);
+            }
+        });
 
         jLabel1.setForeground(new java.awt.Color(102, 102, 102));
         jLabel1.setText("Station A");
@@ -67,33 +113,22 @@ public class ClosestRoutes extends javax.swing.JFrame {
         txtStationA.setEditable(false);
         txtStationA.setBackground(new java.awt.Color(255, 255, 255));
         txtStationA.setForeground(new java.awt.Color(102, 102, 102));
-        txtStationA.setText("Station A");
-
-        jTable1.setBackground(new java.awt.Color(255, 255, 255));
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+        txtStationA.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                txtStationAMouseClicked(evt);
             }
-        ));
-        jScrollPane1.setViewportView(jTable1);
+        });
 
         btnFindPaths.setBackground(new java.awt.Color(102, 153, 255));
         btnFindPaths.setForeground(new java.awt.Color(255, 255, 255));
         btnFindPaths.setText("Find Paths");
         btnFindPaths.setBorder(null);
         btnFindPaths.setBorderPainted(false);
-
-        btnLoadData.setBackground(new java.awt.Color(102, 153, 255));
-        btnLoadData.setForeground(new java.awt.Color(255, 255, 255));
-        btnLoadData.setText("Load Data");
-        btnLoadData.setBorder(null);
-        btnLoadData.setBorderPainted(false);
+        btnFindPaths.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFindPathsActionPerformed(evt);
+            }
+        });
 
         jLabel4.setForeground(new java.awt.Color(102, 102, 102));
         jLabel4.setText("Railway Stations");
@@ -151,9 +186,9 @@ public class ClosestRoutes extends javax.swing.JFrame {
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane3.setViewportView(jTextArea1);
+        txtClosestPath.setColumns(20);
+        txtClosestPath.setRows(5);
+        jScrollPane3.setViewportView(txtClosestPath);
 
         jLabel5.setForeground(new java.awt.Color(102, 102, 102));
         jLabel5.setText("Closest Route Information");
@@ -164,10 +199,18 @@ public class ClosestRoutes extends javax.swing.JFrame {
         txtExecutionTime.setForeground(new java.awt.Color(102, 102, 102));
         txtExecutionTime.setText("0000000");
 
+        lstStationNames.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lstStationNamesMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(lstStationNames);
+
         javax.swing.GroupLayout jPanel53Layout = new javax.swing.GroupLayout(jPanel53);
         jPanel53.setLayout(jPanel53Layout);
         jPanel53Layout.setHorizontalGroup(
             jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel55, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel53Layout.createSequentialGroup()
                 .addGroup(jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel53Layout.createSequentialGroup()
@@ -177,31 +220,30 @@ public class ClosestRoutes extends javax.swing.JFrame {
                         .addGap(39, 39, 39)
                         .addGroup(jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel53Layout.createSequentialGroup()
-                                .addGroup(jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel6)
-                                    .addComponent(txtExecutionTime))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnLoadData, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18))
-                            .addGroup(jPanel53Layout.createSequentialGroup()
                                 .addComponent(jLabel5)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(jPanel53Layout.createSequentialGroup()
-                                .addGroup(jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jScrollPane3)
+                                .addGroup(jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel53Layout.createSequentialGroup()
+                                        .addGroup(jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel6)
+                                            .addComponent(txtExecutionTime))
+                                        .addGap(0, 0, Short.MAX_VALUE))
+                                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel53Layout.createSequentialGroup()
                                         .addGroup(jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(jLabel1)
                                             .addComponent(jLabel2))
                                         .addGap(60, 60, 60)
                                         .addGroup(jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(btnFindPaths, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(txtStationB, javax.swing.GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
-                                            .addComponent(txtStationA))))
-                                .addGap(18, 18, 18)))
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 392, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(15, 15, 15))
-            .addComponent(jPanel55, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(txtStationB)
+                                            .addGroup(jPanel53Layout.createSequentialGroup()
+                                                .addComponent(txtStationA, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                            .addComponent(btnFindPaths, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addGap(76, 76, 76)))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 237, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(30, 30, 30))
         );
         jPanel53Layout.setVerticalGroup(
             jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -209,7 +251,7 @@ public class ClosestRoutes extends javax.swing.JFrame {
                 .addComponent(jPanel55, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel53Layout.createSequentialGroup()
                         .addGroup(jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -221,19 +263,18 @@ public class ClosestRoutes extends javax.swing.JFrame {
                             .addComponent(txtStationB, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(34, 34, 34)
                         .addComponent(btnFindPaths, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 66, Short.MAX_VALUE)
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(37, 37, 37)
-                        .addGroup(jPanel53Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnLoadData, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel53Layout.createSequentialGroup()
-                                .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtExecutionTime))))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 469, Short.MAX_VALUE))
-                .addGap(14, 14, 14))
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtExecutionTime)
+                        .addGap(20, 20, 20))
+                    .addGroup(jPanel53Layout.createSequentialGroup()
+                        .addComponent(jScrollPane2)
+                        .addContainerGap())))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -247,7 +288,7 @@ public class ClosestRoutes extends javax.swing.JFrame {
             .addComponent(jPanel53, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        setSize(new java.awt.Dimension(824, 597));
+        setSize(new java.awt.Dimension(765, 597));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -255,6 +296,55 @@ public class ClosestRoutes extends javax.swing.JFrame {
         // TODO add your handling code here:
         this.dispose();
     }//GEN-LAST:event_btnClose26MouseClicked
+
+    private void txtStationAMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtStationAMouseClicked
+        // TODO add your handling code here:
+        txtStationA.setText("Select Station from Station Names");
+        selectedTextIndex = 0;
+    }//GEN-LAST:event_txtStationAMouseClicked
+
+    private void txtStationBMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtStationBMouseClicked
+        // TODO add your handling code here:
+        txtStationB.setText("Select Station from Station Names");
+        selectedTextIndex = 1;
+    }//GEN-LAST:event_txtStationBMouseClicked
+
+    private void lstStationNamesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstStationNamesMouseClicked
+        // TODO add your handling code here:
+        if (selectedTextIndex == 0)
+            txtStationA.setText(lstStationNames.getSelectedValue());
+        else
+            txtStationB.setText(lstStationNames.getSelectedValue());
+    }//GEN-LAST:event_lstStationNamesMouseClicked
+
+    private void btnFindPathsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFindPathsActionPerformed
+        // TODO add your handling code here:
+        if (txtStationA.getText().length() == 0) {
+            JOptionPane.showMessageDialog(this, "Please select a Station from the List to Station A", "Input Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (txtStationB.getText().length() == 0) {
+            JOptionPane.showMessageDialog(this, "Please select a Station from the List to Station B", "Input Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if(dijkstraAlgo!=null){
+            dijkstraAlgo.applyDijkstra(ds.retrieveStationID(txtStationA.getText()));
+            shortestPath = dijkstraAlgo.getShortestPath(ds.retrieveStationID(txtStationB.getText()));
+            
+            if(shortestPath.isEmpty()){
+                JOptionPane.showMessageDialog(this, "Couldn't generate path", "Path Error", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            
+            path = "";
+            shortestPath.forEach((p) -> {
+                path = path + p + " -> ";
+            });
+            txtClosestPath.setText(path);
+            txtClosestPath.append("\n==DISTANCE : " + dijkstraAlgo.getDistance());
+            txtExecutionTime.setText(String.valueOf(dijkstraAlgo.getExecutedTime()));
+        }
+    }//GEN-LAST:event_btnFindPathsActionPerformed
 
     /**
      * @param args the command line arguments
@@ -294,7 +384,6 @@ public class ClosestRoutes extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel btnClose26;
     private javax.swing.JButton btnFindPaths;
-    private javax.swing.JButton btnLoadData;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -304,10 +393,10 @@ public class ClosestRoutes extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel53;
     private javax.swing.JPanel jPanel54;
     private javax.swing.JPanel jPanel55;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JList<String> lstStationNames;
+    private javax.swing.JTextArea txtClosestPath;
     private javax.swing.JLabel txtExecutionTime;
     private javax.swing.JTextField txtStationA;
     private javax.swing.JTextField txtStationB;

@@ -5,6 +5,9 @@
  */
 package Prims;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 /**
  *
  * @author Hishara
@@ -12,13 +15,16 @@ package Prims;
 public class PrimsAlgo {
 
     int dataSetGraph[][];
+    Map<Integer, String> stationDataTreeMap;
     int mst[];
     long startTime;
     long endTime;
     long executedTime;
+    Map<String, Integer> minimumSpan;
 
-    public PrimsAlgo(int dataSetGraph[][]) {
+    public PrimsAlgo(int dataSetGraph[][], Map<Integer, String> stationDataTreeMap) {
         this.dataSetGraph = dataSetGraph;
+        this.stationDataTreeMap = stationDataTreeMap;
     }
 
     public void applyPrims() {
@@ -87,32 +93,38 @@ public class PrimsAlgo {
                     cDistances[k] = dataSetGraph[minVertex][k];
                 }
             }
-
         }
-        
+
         //getting the end time in nanoseconds
         endTime = System.nanoTime();
-        executedTime = endTime-startTime;
+        executedTime = endTime - startTime;
         System.out.println("\n\n==Time Duration for Prims Execution : " + (executedTime) + " nanoseconds==\n\n");
     }
 
-    public int getMinimumConnectors() {
+    public Map<String, Integer> getMinimumConnectors() {
         //getting the current time in nanoseconds
         startTime = System.nanoTime();
+        minimumSpan = new TreeMap<>();
         System.out.println("\n==Minimum Railway Tracks between stations==\n");
         int minDistance = 0;
         for (int i = 1; i < dataSetGraph.length; i++) {
-            if (mst[i] != -1) {
-                System.out.println("Station : " + mst[i] + " to " + i + "\t=" + dataSetGraph[mst[i]][i]);
+            if (mst[i] != -1&&mst[i]!=0) {
+                minimumSpan.put(i + " to " + mst[i], dataSetGraph[mst[i]][i]);
+//                System.out.println("Station : " + mst[i] + " to " + i + "\t=" + dataSetGraph[mst[i]][i]);
                 minDistance = minDistance + dataSetGraph[mst[i]][i];
             }
         }
         System.out.println("Min Weight = " + minDistance);
         //getting the end time in nanoseconds
         endTime = System.nanoTime();
-        
-        System.out.println("\n\n==Time Duration for Retrieving Minimum Connectors : " + (endTime-startTime) + " nanoseconds==\n\n");
-        return minDistance;
+
+        System.out.println("\n\n==Time Duration for Retrieving Minimum Connectors : " + (endTime - startTime) + " nanoseconds==\n\n");
+//        getPaths();
+        return minimumSpan;
+    }
+    
+    public long getExecutionTime(){
+        return executedTime;
     }
 
 }

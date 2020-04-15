@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import trainalgo.Codes;
 import trainalgo.stations.Dataset;
 
 /**
@@ -65,6 +66,7 @@ public class ManageStations extends javax.swing.JFrame {
         for (Map.Entry<Integer, String> entry : stationDataTreeMap.entrySet()) {
             defaultTableModel.insertRow(tblStationInfo.getRowCount(), new Object[]{entry.getKey(), entry.getValue()});
         }
+        txtExecutionTime.setText(String.valueOf(ds.getExecutionTime()));
     }
 
     /**
@@ -351,12 +353,14 @@ public class ManageStations extends javax.swing.JFrame {
 
         try {
 
-            if (ds.addStationToStationInfoDatastruct(txtStationName.getText())) {
+            if (ds.addStationToStationInfoDatastruct(txtStationName.getText())==Codes.STATION_ADDED) {
                 JOptionPane.showMessageDialog(this, "Station data added", "Success", JOptionPane.INFORMATION_MESSAGE);
                 refreshData();
                 txtExecutionTime.setText(String.valueOf(ds.getExecutionTime()));
+                return;
+            }else{
+                JOptionPane.showMessageDialog(this, "An error occured while processing request", "Error", JOptionPane.WARNING_MESSAGE);
             }
-
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "SQL Error : " + e.getMessage(), "Exception", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
@@ -382,10 +386,12 @@ public class ManageStations extends javax.swing.JFrame {
         }
         try {
 
-            if (ds.updateStationInStationInfoDatastruct(selectedStation, txtStationName.getText())) {
+            if (ds.updateStationInStationInfoDatastruct(selectedStation, txtStationName.getText())==Codes.STATION_UPDATED) {
                 JOptionPane.showMessageDialog(this, "Station data updated", "Success", JOptionPane.INFORMATION_MESSAGE);
                 refreshData();
                 txtExecutionTime.setText(String.valueOf(ds.getExecutionTime()));
+            }else{
+                JOptionPane.showMessageDialog(this, "An error occured while processing request", "Error", JOptionPane.WARNING_MESSAGE);
             }
 
         } catch (Exception e) {
@@ -407,10 +413,12 @@ public class ManageStations extends javax.swing.JFrame {
         
         try {
 
-            if (ds.removeStationInStationInfoDatastructure(txtStationName.getText())) {
+            if (ds.removeStationInStationInfoDatastructure(txtStationName.getText())==Codes.STATION_REMOVED) {
                 JOptionPane.showMessageDialog(this, "Station data updated", "Success", JOptionPane.INFORMATION_MESSAGE);
                 refreshData();
                 txtExecutionTime.setText(String.valueOf(ds.getExecutionTime()));
+            }else{
+                JOptionPane.showMessageDialog(this, "An error occured while processing request", "Error", JOptionPane.WARNING_MESSAGE);
             }
 
         } catch (Exception e) {

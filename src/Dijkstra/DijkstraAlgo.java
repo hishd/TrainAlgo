@@ -20,15 +20,27 @@ public class DijkstraAlgo {
     private int paths[];
     int dataSetGraph[][];
     Map<Integer, String> trainStationInfo;
-    ArrayList<String> shortestPath;
+    ArrayList<String> shortestPathNames;
+    ArrayList<Integer> shortestPathID;
     int shortestDistance = -1;
     long startTime;
     long endTime;
     long executedTime;
+    int distance = 0;
+    //dataset to store the subgraph of MST
+    int subsetGraph[][];
 
     public DijkstraAlgo(int dataSetGraph[][], Map<Integer, String> trainStationInfo) {
         this.dataSetGraph = dataSetGraph;
         this.trainStationInfo = trainStationInfo;
+    }
+
+    public long getExecutedTime() {
+        return executedTime;
+    }
+
+    public int getDistance() {
+        return this.distance;
     }
 
     //main algorithm
@@ -78,7 +90,7 @@ public class DijkstraAlgo {
             }
 
             //set the vertex as visited
-            System.out.println("Vertex : " + i + " cVertex : " + cVertex);
+//            System.out.println("Vertex : " + i + " cVertex : " + cVertex);
             //visited[cVertex] = true;
             if (cVertex != -1) {
                 visited[cVertex] = true;
@@ -100,28 +112,29 @@ public class DijkstraAlgo {
             }
 
         }
-        
+
         //getting the end time in nanoseconds
         endTime = System.nanoTime();
-        executedTime = endTime-startTime;
+        executedTime = endTime - startTime;
         System.out.println("\n\n==Time Duration for Dijkstra Execution : " + (executedTime) + " nanoseconds==\n\n");
 
     }
-    
-    public int getShortestDistance(){
+
+    public int getShortestDistance() {
         return shortestDistance;
     }
-    
-    public ArrayList<String> getShortestPath(int destinationStation){
+
+    public ArrayList<String> getShortestPath(int destinationStation) {
         //getting the current time in nanoseconds
         startTime = System.nanoTime();
         shortestDistance = distances[destinationStation];
-        shortestPath = new ArrayList<>();
+        shortestPathNames = new ArrayList<>();
         findShortestPath(destinationStation);
         //getting the end time in nanoseconds
         endTime = System.nanoTime();
-        System.out.println("\n\n==Time Duration for Retrirving Shortest Path : nanoseconds" + (endTime-startTime) + " ==\n\n");
-        return shortestPath;
+        System.out.println("\n\n==Time Duration for Retrirving Shortest Path : nanoseconds" + (endTime - startTime) + " ==\n\n");
+        distance = distances[destinationStation];
+        return shortestPathNames;
     }
 
     //get the shortest path between the source Station and destination Station
@@ -133,8 +146,40 @@ public class DijkstraAlgo {
         }
 
         findShortestPath(paths[vertex]);
-        System.out.print(" Station :" + trainStationInfo.get(vertex) + " (" + vertex + ") >>");
-        shortestPath.add(trainStationInfo.get(vertex));
+//        System.out.print(" Station :" + trainStationInfo.get(vertex) + " (" + vertex + ") >>");
+        if (shortestPathNames != null) {
+            shortestPathNames.add(trainStationInfo.get(vertex));
+        }
+        //adding the shortest path id to the arraylist which will be lated used to generate the Subgraph of MST
+        if (shortestPathID != null) {
+            shortestPathID.add(vertex);
+        }
+    }
+
+    //The function is used when generating of a MST subgraph which is later used by the Prims Algorithm
+    public int[][] getSubsetGraph() {
+        return this.subsetGraph;
+    }
+
+    public void constructGraph(int destination) {
+        if (subsetGraph == null) {
+            //Initialize the subgraph setting every distance to 0
+            subsetGraph = new int[dataSetGraph.length][dataSetGraph.length];
+            shortestPathID = new ArrayList<>();
+            for (int row = 0; row < dataSetGraph.length; row++) {
+                for (int col = 0; col < dataSetGraph.length; col++) {
+                    subsetGraph[row][col] = 0;
+                }
+            }
+        }
+        findShortestPath(destination);
+        //iterating through the shortest path IDs
+        for (int i = 0; i < shortestPathID.size()-1; i++) {
+//            System.out.print(shortestPathID.get(i)+">>");
+            //generating the paths vice versa for the nodes by setting the distance
+            subsetGraph[shortestPathID.get(i)][shortestPathID.get(i+1)] = dataSetGraph[shortestPathID.get(i)][shortestPathID.get(i+1)];
+            subsetGraph[shortestPathID.get(i+1)][shortestPathID.get(i)] = dataSetGraph[shortestPathID.get(i)][shortestPathID.get(i+1)];
+        }
     }
 
 }

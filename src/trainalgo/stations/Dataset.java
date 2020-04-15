@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
+import trainalgo.Codes;
+import static trainalgo.TrainAlgo.REVERSED_LINKS;
 
 /**
  *
@@ -69,13 +71,17 @@ public class Dataset {
     }
 
     //adding new Station Information to application data structure and adding the new information to DB
-    public boolean addStationToStationInfoDatastruct(String StationName) throws SQLException {
+    public int addStationToStationInfoDatastruct(String StationName) throws SQLException {
         if (stationDataTreeMap == null) {
             initStationInfoDatastruct();
         }
 
         if (stationDB == null) {
             stationDB = new StationDB();
+        }
+
+        if (stationDataTreeMap.containsValue(StationName)) {
+            return Codes.STATION_ALREADY_EXSISTS;
         }
 
         int stationID = lastStationID != 0 ? lastStationID + 1 : stationDB.getLastStationID() + 1;
@@ -96,22 +102,30 @@ public class Dataset {
 //            System.out.print("\tStation Name : \t ");
 //            System.out.print(entry.getValue());
 //        }
-        return stationDB.addStation(StationName);
+        if (stationDB.addStation(StationName)) {
+            return Codes.STATION_ADDED;
+        }
+        return Codes.DB_NOT_UPDATED;
 
     }
 
     //update the old station information with the new station information on the application dataset
-    public boolean updateStationInStationInfoDatastruct(String oldStation, String newStation) {
+    public int updateStationInStationInfoDatastruct(String oldStation, String newStation) {
 
         int stationID = retrieveStationID(oldStation);
 
         if (stationID == 0) {
-            return false;
+            return Codes.INVALID_STATION;
         }
 
         if (stationDB == null) {
             stationDB = new StationDB();
         }
+
+        if (!stationDataTreeMap.containsValue(oldStation)) {
+            return Codes.STATION_DOESNT_EXSISTS;
+        }
+
         //getting the current time in nanoseconds
         startTime = System.nanoTime();
         stationDataTreeMap.put(stationID, newStation);
@@ -119,24 +133,34 @@ public class Dataset {
         endTime = System.nanoTime();
         executionTime = endTime - startTime;
         System.out.println("\n\n==Time Duration for Updating information in Dataset: " + (executionTime) + " nanoseconds==\n\n");
-        return stationDB.updateStation(stationID, newStation);
+        if (stationDB.updateStation(stationID, newStation)) {
+            return Codes.STATION_UPDATED;
+        } else {
+            return Codes.DB_NOT_UPDATED;
+        }
     }
 
     //Remove the station information from the application data structure and remove from DB
-    public boolean removeStationInStationInfoDatastructure(String stationName) {
+    public int removeStationInStationInfoDatastructure(String stationName) {
 
         int stationID = retrieveStationID(stationName);
 
         if (stationID == 0) {
-            return false;
+            return Codes.INVALID_STATION;
         }
 
         if (stationDB == null) {
             stationDB = new StationDB();
         }
 
+        if (!stationDataTreeMap.containsValue(stationName)) {
+            return Codes.STATION_DOESNT_EXSISTS;
+        }
+
         if (lastStationID == 0) {
             lastStationID = stationDB.getLastStationID();
+        } else {
+            lastStationID++;
         }
         //getting the current time in nanoseconds
         startTime = System.nanoTime();
@@ -145,7 +169,12 @@ public class Dataset {
         endTime = System.nanoTime();
         executionTime = endTime - startTime;
         System.out.println("\n\n==Time Duration for Deleting information in Dataset: " + (executionTime) + " nanoseconds==\n\n");
-        return stationDB.removeStation(stationID);
+        if (stationDB.removeStation(stationID)) {
+            return Codes.STATION_REMOVED;
+        } else {
+            return Codes.DB_NOT_UPDATED;
+        }
+
     }
 
     /*
@@ -159,7 +188,7 @@ public class Dataset {
             stationDB = new StationDB();
         }
 
-        int stationCount = stationDB.getLastStationID();
+        int stationCount = stationDB.getLastStationID()+1;
 
         stationPaths = new int[stationCount][stationCount];
 
@@ -175,6 +204,8 @@ public class Dataset {
 
         while (rs.next()) {
             stationPaths[rs.getInt(1)][rs.getInt(2)] = rs.getInt(3);
+            if(REVERSED_LINKS)
+                stationPaths[rs.getInt(2)][rs.getInt(1)] = rs.getInt(3);
         }
 
         //getting the end time in nanoseconds
@@ -222,6 +253,9 @@ public class Dataset {
         //getting the current time in nanoseconds
         startTime = System.nanoTime();
         stationPaths[stationAID][stationBID] = distance;
+        //Reverse the connection
+        if(REVERSED_LINKS)
+            stationPaths[stationBID][stationAID] = distance;
         //getting the end time in nanoseconds
         endTime = System.nanoTime();
         executionTime = endTime - startTime;
@@ -260,6 +294,8 @@ public class Dataset {
         //getting the current time in nanoseconds
         startTime = System.nanoTime();
         stationPaths[stationAID][stationBID] = distance;
+        if(REVERSED_LINKS)
+            stationPaths[stationBID][stationAID] = distance;
         //getting the end time in nanoseconds
         endTime = System.nanoTime();
         executionTime = endTime - startTime;
@@ -295,6 +331,8 @@ public class Dataset {
         //getting the current time in nanoseconds
         startTime = System.nanoTime();
         stationPaths[stationAID][stationBID] = 0;
+        if(REVERSED_LINKS)
+            stationPaths[stationBID][stationAID] = 0;
         //getting the end time in nanoseconds
         endTime = System.nanoTime();
         executionTime = endTime - startTime;

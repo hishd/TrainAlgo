@@ -18,6 +18,8 @@ import trainalgo.stations.Stations;
  */
 public class TrainAlgo {
 
+    public static boolean REVERSED_LINKS = true;
+
     /**
      * @param args the command line arguments
      */
@@ -26,18 +28,19 @@ public class TrainAlgo {
         /*Creating an object of the Stations Class*/
 //        Stations s = new Stations();
 
-        /*Generate Rancom Links*/
-//        s.linkSampleData(200); //200 = no of random links
+        /*Generate Random Links*/
+//        s.insertSampleData();
+//        s.linkSampleData(600); //600 = no of random links
         try {
 
-//            Dataset ds = new Dataset();
-//            ds.initStationInfoDatastruct();
+            Dataset ds = new Dataset();
+            ds.initStationInfoDatastruct();
 //            ds.addStationToStationInfoDatastruct("New Station 2");
 //            ds.updateStationInStationInfoDatastruct("New Station", "B new Station");
 //            ds.removeStationInStationInfoDatastructure("New Station 3");
 //            ds.addStationToStationInfoDatastruct("New Station 4");
 
-//            ds.initStationPathDatastruct();
+            ds.initStationPathDatastruct();
 //            ds.addStationPathToDataStruct("Kurana", "Negombo", 100);
 //            ds.updateStationPathInDataStructure("Kurana", "Negombo", 50);
 //            ds.removeStationPathInDatastructure("Kurana", "Negombo");
@@ -52,24 +55,25 @@ public class TrainAlgo {
 
             /*Displaying all paths(shortest path)*/
 //            System.out.println("\n\n==PATHS==\n");
-
 //            shortestPath.forEach((path) -> {
 //                System.out.println(path);
 //            });
-            
             /*Displaying total distance(shortest path distance)*/
 //            System.out.println("Shortest Distance : " + String.valueOf(algo.getShortestDistance()));
-            
             /*The shortestPath ArrayList contains the shortest path from source station to the destination station*/
-            
-            /*Testing Code snippet of prims algorithm*/
-//            PrimsAlgo primsAlgo = new PrimsAlgo(ds.getStationPaths());
+ /*Testing Code snippet of prims algorithm*/
+//            int graph[][] = new int[][]{{0,0, 0, 0, 0, 0},
+//                                        {0,0, 2, 0, 6, 0},
+//                                        {0,2, 0, 3, 8, 5},
+//                                        {0,0, 3, 0, 0, 7},
+//                                        {0,6, 8, 0, 0, 9},
+//                                        {0,0, 5, 7, 9, 0}};
+//            PrimsAlgo primsAlgo = new PrimsAlgo(ds.getStationPaths(), ds.getStationDataTreeMap());
 //            primsAlgo.applyPrims();
 //            primsAlgo.getMinimumConnectors();
-              
-              //Run GUI
-              new MainMenu().setVisible(true);
 
+            //Run GUI
+              new MainMenu().setVisible(true);
         } catch (Exception e) {
             e.printStackTrace();
         }

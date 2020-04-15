@@ -5,17 +5,86 @@
  */
 package UI;
 
+import Dijkstra.DijkstraAlgo;
+import Prims.PrimsAlgo;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import trainalgo.stations.Dataset;
+
 /**
  *
  * @author Hishara
  */
 public class MinimumTracks extends javax.swing.JFrame {
 
+    private static Map<Integer, String> stationDataTreeMap;
+    Dataset ds;
+    DefaultTableModel defaultTableModel;
+    DefaultListModel<String> defaultListModel;
+    int selectedStationID = 0;
+    private static Map<Integer, String> selectedStations;
+    private int[][] stationPaths;
+    private int[][] selectedStationPaths;
+    PrimsAlgo primsAlgo;
+    Map<String, Integer> minimumSpan;
+    int totalDistance = 0;
+
     /**
      * Creates new form MinimumTracks
      */
     public MinimumTracks() {
         initComponents();
+        initTrainInfoDataStruct();
+    }
+
+    private void initTrainInfoDataStruct() {
+        System.out.println("Initializing Data Structures");
+        ds = new Dataset();
+        try {
+            ds.initStationInfoDatastruct();
+            stationDataTreeMap = ds.getStationDataTreeMap();
+            if (stationDataTreeMap == null || stationDataTreeMap.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Data set is empty", "Exception", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            defaultTableModel = new DefaultTableModel();
+            defaultTableModel.addColumn("Station ID");
+            defaultTableModel.addColumn("Station Name");
+            tblStationInfo.setModel(defaultTableModel);
+
+            defaultListModel = new DefaultListModel<>();
+            lstSelectedStations.setModel(defaultListModel);
+
+            for (Map.Entry<Integer, String> entry : stationDataTreeMap.entrySet()) {
+                defaultTableModel.insertRow(tblStationInfo.getRowCount(), new Object[]{entry.getKey(), entry.getValue()});
+            }
+
+            selectedStations = new TreeMap<>();
+            txtExecutionTime.setText(String.valueOf(ds.getExecutionTime()));
+
+            ds.initStationPathDatastruct();
+            stationPaths = ds.getStationPaths();
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "SQL Error : " + e.getMessage(), "Exception", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error : " + e.getMessage(), "Exception", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void refreshData() {
+        stationDataTreeMap = ds.getStationDataTreeMap();
+        defaultTableModel.setRowCount(0);
+        for (Map.Entry<Integer, String> entry : stationDataTreeMap.entrySet()) {
+            defaultTableModel.insertRow(tblStationInfo.getRowCount(), new Object[]{entry.getKey(), entry.getValue()});
+        }
+        txtExecutionTime.setText(String.valueOf(ds.getExecutionTime()));
     }
 
     /**
@@ -29,9 +98,9 @@ public class MinimumTracks extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        txtStationID = new javax.swing.JTextField();
+        txtStationName = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblStationInfo = new javax.swing.JTable();
         btnRemoveStation = new javax.swing.JButton();
         btnAddStation = new javax.swing.JButton();
         btnLoadData = new javax.swing.JButton();
@@ -41,10 +110,15 @@ public class MinimumTracks extends javax.swing.JFrame {
         btnClose = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        lstSelectedStations = new javax.swing.JList<>();
         jLabel2 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         txtExecutionTime = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        txtOutput = new javax.swing.JTextArea();
+        jLabel5 = new javax.swing.JLabel();
+        btnLoadPaths = new javax.swing.JButton();
+        btnShortestPathStations = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
@@ -55,11 +129,12 @@ public class MinimumTracks extends javax.swing.JFrame {
         jLabel1.setForeground(new java.awt.Color(102, 102, 102));
         jLabel1.setText("Station Name");
 
-        txtStationID.setBackground(new java.awt.Color(255, 255, 255));
-        txtStationID.setForeground(new java.awt.Color(102, 102, 102));
+        txtStationName.setEditable(false);
+        txtStationName.setBackground(new java.awt.Color(255, 255, 255));
+        txtStationName.setForeground(new java.awt.Color(102, 102, 102));
 
-        jTable1.setBackground(new java.awt.Color(255, 255, 255));
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblStationInfo.setBackground(new java.awt.Color(255, 255, 255));
+        tblStationInfo.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -70,25 +145,45 @@ public class MinimumTracks extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        tblStationInfo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblStationInfoMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblStationInfo);
 
         btnRemoveStation.setBackground(new java.awt.Color(102, 153, 255));
         btnRemoveStation.setForeground(new java.awt.Color(255, 255, 255));
         btnRemoveStation.setText("Remove Station");
         btnRemoveStation.setBorder(null);
         btnRemoveStation.setBorderPainted(false);
+        btnRemoveStation.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoveStationActionPerformed(evt);
+            }
+        });
 
         btnAddStation.setBackground(new java.awt.Color(102, 153, 255));
         btnAddStation.setForeground(new java.awt.Color(255, 255, 255));
         btnAddStation.setText("Add Station");
         btnAddStation.setBorder(null);
         btnAddStation.setBorderPainted(false);
+        btnAddStation.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddStationActionPerformed(evt);
+            }
+        });
 
         btnLoadData.setBackground(new java.awt.Color(102, 153, 255));
         btnLoadData.setForeground(new java.awt.Color(255, 255, 255));
         btnLoadData.setText("Load Data");
         btnLoadData.setBorder(null);
         btnLoadData.setBorderPainted(false);
+        btnLoadData.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoadDataActionPerformed(evt);
+            }
+        });
 
         jLabel4.setForeground(new java.awt.Color(102, 102, 102));
         jLabel4.setText("Station Information");
@@ -146,7 +241,12 @@ public class MinimumTracks extends javax.swing.JFrame {
                 .addContainerGap(20, Short.MAX_VALUE))
         );
 
-        jScrollPane2.setViewportView(jList1);
+        lstSelectedStations.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lstSelectedStationsMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(lstSelectedStations);
 
         jLabel2.setForeground(new java.awt.Color(102, 102, 102));
         jLabel2.setText("Selected Stations");
@@ -156,6 +256,35 @@ public class MinimumTracks extends javax.swing.JFrame {
 
         txtExecutionTime.setForeground(new java.awt.Color(102, 102, 102));
         txtExecutionTime.setText("0000000");
+
+        txtOutput.setColumns(20);
+        txtOutput.setRows(5);
+        jScrollPane3.setViewportView(txtOutput);
+
+        jLabel5.setForeground(new java.awt.Color(102, 102, 102));
+        jLabel5.setText("Output (Minimum Tracks)");
+
+        btnLoadPaths.setBackground(new java.awt.Color(102, 153, 255));
+        btnLoadPaths.setForeground(new java.awt.Color(255, 255, 255));
+        btnLoadPaths.setText("Load Paths");
+        btnLoadPaths.setBorder(null);
+        btnLoadPaths.setBorderPainted(false);
+        btnLoadPaths.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoadPathsActionPerformed(evt);
+            }
+        });
+
+        btnShortestPathStations.setBackground(new java.awt.Color(102, 153, 255));
+        btnShortestPathStations.setForeground(new java.awt.Color(255, 255, 255));
+        btnShortestPathStations.setText("Shortest Paths to Stations");
+        btnShortestPathStations.setBorder(null);
+        btnShortestPathStations.setBorderPainted(false);
+        btnShortestPathStations.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnShortestPathStationsActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -170,27 +299,38 @@ public class MinimumTracks extends javax.swing.JFrame {
                         .addGap(39, 39, 39)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(jLabel6)
-                                            .addComponent(txtExecutionTime))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(btnRemoveStation, javax.swing.GroupLayout.DEFAULT_SIZE, 109, Short.MAX_VALUE)
-                                            .addComponent(btnLoadData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                         .addComponent(jLabel1)
                                         .addGap(57, 57, 57)
-                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(txtStationID)
-                                            .addComponent(btnAddStation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                        .addComponent(txtStationName))
+                                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                                .addComponent(btnAddStation, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(btnRemoveStation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                    .addComponent(jLabel6)
+                                                    .addComponent(txtExecutionTime))
+                                                .addGap(37, 37, 37)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(btnLoadPaths, javax.swing.GroupLayout.DEFAULT_SIZE, 109, Short.MAX_VALUE))
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING))
                                 .addGap(18, 18, 18))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel2)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jLabel5))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 392, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 392, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(btnShortestPathStations, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnLoadData, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addGap(15, 15, 15))
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -205,25 +345,31 @@ public class MinimumTracks extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel1)
-                            .addComponent(txtStationID, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txtStationName, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
-                        .addComponent(btnAddStation, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnAddStation, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnRemoveStation, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnLoadPaths, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(29, 29, 29)
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(btnRemoveStation, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnLoadData, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtExecutionTime)
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel5)
+                        .addGap(9, 9, 9)
+                        .addComponent(jScrollPane3))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 618, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtExecutionTime))
+                    .addComponent(btnLoadData, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnShortestPathStations, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(12, 12, 12))
         );
 
@@ -238,7 +384,7 @@ public class MinimumTracks extends javax.swing.JFrame {
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        setSize(new java.awt.Dimension(793, 600));
+        setSize(new java.awt.Dimension(793, 804));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -246,6 +392,128 @@ public class MinimumTracks extends javax.swing.JFrame {
         // TODO add your handling code here:
         this.dispose();
     }//GEN-LAST:event_btnCloseMouseClicked
+
+    private void btnLoadDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadDataActionPerformed
+        // TODO add your handling code here:
+        refreshData();
+    }//GEN-LAST:event_btnLoadDataActionPerformed
+
+    private void tblStationInfoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblStationInfoMouseClicked
+        // TODO add your handling code here:
+        txtStationName.setText(tblStationInfo.getModel().getValueAt(tblStationInfo.getSelectedRow(), 1).toString());
+        selectedStationID = Integer.parseInt(tblStationInfo.getModel().getValueAt(tblStationInfo.getSelectedRow(), 0).toString());
+    }//GEN-LAST:event_tblStationInfoMouseClicked
+
+    private void btnAddStationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddStationActionPerformed
+        // TODO add your handling code here:
+        if (txtStationName.getText().length() < 1) {
+            JOptionPane.showMessageDialog(this, "Please select a station from the table.", "Input Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (selectedStations != null) {
+
+            if (selectedStations.containsKey(selectedStationID)) {
+                JOptionPane.showMessageDialog(this, "Station is already selected.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            defaultListModel.add(defaultListModel.getSize(), txtStationName.getText());
+            selectedStations.put(selectedStationID, txtStationName.getText());
+        }
+    }//GEN-LAST:event_btnAddStationActionPerformed
+
+    private void btnRemoveStationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveStationActionPerformed
+        // TODO add your handling code here:
+        if (!selectedStations.containsKey(selectedStationID)) {
+            JOptionPane.showMessageDialog(this, "Station is not in the selected list.", "Input Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        defaultListModel.removeElement(txtStationName.getText());
+        selectedStations.remove(selectedStationID);
+    }//GEN-LAST:event_btnRemoveStationActionPerformed
+
+    private void lstSelectedStationsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstSelectedStationsMouseClicked
+        // TODO add your handling code here:
+        txtStationName.setText(lstSelectedStations.getSelectedValue());
+    }//GEN-LAST:event_lstSelectedStationsMouseClicked
+
+    private void btnLoadPathsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoadPathsActionPerformed
+        // TODO add your handling code here:
+        if (selectedStations.size() < 2) {
+            JOptionPane.showMessageDialog(this, "Please select more than 2 stations.", "Input Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        //This arraylist will hold the ID of the selected stations
+        ArrayList<Integer> stations = new ArrayList<>();
+        //create a dijkstra algorithm object in order to find the shortest paths betwen every vertices combination
+        DijkstraAlgo dijkstraAlgo = new DijkstraAlgo(stationPaths, stationDataTreeMap);
+        
+        //adding the selected station IDs to stations arraylist
+        selectedStations.entrySet().forEach((entry) -> {
+            stations.add(entry.getKey());
+        });
+
+        //iterating through every combination of vertices(selected vertices)
+        for (int i = 0; i < stations.size(); i++) {
+            for (int j = i + 1; j < stations.size(); j++) {
+                //applyying dijkstra inorder to find shortest paths using the source vertex
+                dijkstraAlgo.applyDijkstra(stations.get(i));
+                //passing the destination vertex and generate and update the subgraph inorder to find the MST subgraph
+                dijkstraAlgo.constructGraph(stations.get(j));
+//
+//                System.out.println(stations.get(i) + " - " + stations.get(j));
+            }
+        }
+
+        if (dijkstraAlgo != null) {
+            totalDistance = 0;
+            txtOutput.setText("");
+            //retrieve the subset graph consist of all the shortest distances inorder to travel all the vertex combionations (user input combinations)
+            selectedStationPaths = dijkstraAlgo.getSubsetGraph();
+            //applying prims algorithm
+            primsAlgo = new PrimsAlgo(selectedStationPaths, stationDataTreeMap);
+            primsAlgo.applyPrims();
+            minimumSpan = primsAlgo.getMinimumConnectors();
+
+            //displaying the paths and minimum connectors on the textarea
+            for (Map.Entry<String, Integer> entry : minimumSpan.entrySet()) {
+                txtOutput.append(entry.getKey() + " = " + entry.getValue() + "\n");
+                totalDistance = totalDistance + entry.getValue();
+            }
+            txtOutput.append("\n\n==Total Distance : " + totalDistance);
+            txtExecutionTime.setText(String.valueOf(primsAlgo.getExecutionTime()));
+            //Test Code Snippet
+//            for (int row = 0; row < selectedStationPaths.length; row++) {
+//                for (int col = 0; col < selectedStationPaths.length; col++) {
+//                    if(selectedStationPaths[row][col]>0)
+//                        System.out.println("Station : " +row+ " Station " +col+" Distance : "+selectedStationPaths[row][col]);
+//                }
+//            }
+        }
+
+    }//GEN-LAST:event_btnLoadPathsActionPerformed
+
+    private void btnShortestPathStationsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShortestPathStationsActionPerformed
+        // TODO add your handling code here:
+        if (stationPaths != null) {
+            totalDistance = 0;
+            txtOutput.setText("");
+            //applying prims algorithm
+            primsAlgo = new PrimsAlgo(stationPaths, stationDataTreeMap);
+            primsAlgo.applyPrims();
+            minimumSpan = primsAlgo.getMinimumConnectors();
+
+            //displaying the paths and minimum connectors on the textarea
+            for (Map.Entry<String, Integer> entry : minimumSpan.entrySet()) {
+                txtOutput.append(entry.getKey() + " = " + entry.getValue() + "\n");
+                totalDistance = totalDistance + entry.getValue();
+            }
+            txtOutput.append("\n\n==Total Distance : " + totalDistance);
+            txtExecutionTime.setText(String.valueOf(primsAlgo.getExecutionTime()));
+        }
+    }//GEN-LAST:event_btnShortestPathStationsActionPerformed
 
     /**
      * @param args the command line arguments
@@ -286,20 +554,25 @@ public class MinimumTracks extends javax.swing.JFrame {
     private javax.swing.JButton btnAddStation;
     private javax.swing.JLabel btnClose;
     private javax.swing.JButton btnLoadData;
+    private javax.swing.JButton btnLoadPaths;
     private javax.swing.JButton btnRemoveStation;
+    private javax.swing.JButton btnShortestPathStations;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JList<String> jList1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JList<String> lstSelectedStations;
+    private javax.swing.JTable tblStationInfo;
     private javax.swing.JLabel txtExecutionTime;
-    private javax.swing.JTextField txtStationID;
+    private javax.swing.JTextArea txtOutput;
+    private javax.swing.JTextField txtStationName;
     // End of variables declaration//GEN-END:variables
 }
