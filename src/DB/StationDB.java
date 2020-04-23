@@ -231,7 +231,8 @@ public class StationDB {
             ps = conn.prepareStatement("SELECT station_id FROM tbl_stations ORDER BY station_id DESC LIMIT 1");
             rs = ps.executeQuery();
             rs.next();
-            return rs.getInt(1);
+            
+            return rs.getRow()!=0 ? rs.getInt(1) : 0;
 
         } catch (SQLException e) {
             e.printStackTrace();

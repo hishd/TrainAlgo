@@ -176,6 +176,7 @@ public class ManageStationLinks extends javax.swing.JFrame {
         btnRemoveLink.setText("Remove Link");
         btnRemoveLink.setBorder(null);
         btnRemoveLink.setBorderPainted(false);
+        btnRemoveLink.setOpaque(true);
         btnRemoveLink.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRemoveLinkActionPerformed(evt);
@@ -187,6 +188,7 @@ public class ManageStationLinks extends javax.swing.JFrame {
         btnAddLink.setText("Add Link");
         btnAddLink.setBorder(null);
         btnAddLink.setBorderPainted(false);
+        btnAddLink.setOpaque(true);
         btnAddLink.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnAddLinkActionPerformed(evt);
@@ -198,6 +200,7 @@ public class ManageStationLinks extends javax.swing.JFrame {
         btnUpdateLink.setText("Update Link");
         btnUpdateLink.setBorder(null);
         btnUpdateLink.setBorderPainted(false);
+        btnUpdateLink.setOpaque(true);
         btnUpdateLink.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateLinkActionPerformed(evt);
@@ -209,6 +212,7 @@ public class ManageStationLinks extends javax.swing.JFrame {
         btnLoadData.setText("Load Data");
         btnLoadData.setBorder(null);
         btnLoadData.setBorderPainted(false);
+        btnLoadData.setOpaque(true);
         btnLoadData.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnLoadDataActionPerformed(evt);
@@ -249,7 +253,7 @@ public class ManageStationLinks extends javax.swing.JFrame {
             jPanel54Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel54Layout.createSequentialGroup()
                 .addComponent(btnClose26)
-                .addGap(0, 1, Short.MAX_VALUE))
+                .addGap(0, 3, Short.MAX_VALUE))
         );
 
         jLabel3.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
@@ -317,7 +321,7 @@ public class ManageStationLinks extends javax.swing.JFrame {
                             .addComponent(txtDistance))
                         .addGroup(jPanel53Layout.createSequentialGroup()
                             .addComponent(btnAddLink, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 37, Short.MAX_VALUE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
                             .addComponent(btnUpdateLink, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGap(29, 29, 29)
                             .addComponent(btnRemoveLink, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE))))

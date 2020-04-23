@@ -3,9 +3,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Hishara/Documents/NetBeansProjects/TrainAlgo/TrainAlgo/src/UI/MinimumTracks.java</file>
-            <file>file:/C:/Users/Hishara/Documents/NetBeansProjects/TrainAlgo/TrainAlgo/src/Dijkstra/DijkstraAlgo.java</file>
-            <file>file:/C:/Users/Hishara/Documents/NetBeansProjects/TrainAlgo/TrainAlgo/src/trainalgo/TrainAlgo.java</file>
+            <file>file:/C:/Users/Hishara/Documents/NetBeansProjects/TrainAlgo/TrainAlgo/src/trainalgo/stations/Stations.java</file>
+            <file>file:/C:/Users/Hishara/Documents/NetBeansProjects/TrainAlgo/TrainAlgo/src/trainalgo/stations/Dataset.java</file>
             <file>file:/C:/Users/Hishara/Documents/NetBeansProjects/TrainAlgo/TrainAlgo/src/Prims/PrimsAlgo.java</file>
         </group>
     </open-files>

@@ -8,7 +8,10 @@ package trainalgo;
 import Dijkstra.DijkstraAlgo;
 import Prims.PrimsAlgo;
 import UI.MainMenu;
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 import trainalgo.stations.Dataset;
 import trainalgo.stations.Stations;
 
@@ -71,9 +74,13 @@ public class TrainAlgo {
 //            PrimsAlgo primsAlgo = new PrimsAlgo(ds.getStationPaths(), ds.getStationDataTreeMap());
 //            primsAlgo.applyPrims();
 //            primsAlgo.getMinimumConnectors();
-
             //Run GUI
-              new MainMenu().setVisible(true);
+            new MainMenu().setVisible(true);
+        }catch (NullPointerException e) {
+            JOptionPane.showMessageDialog(null, "SQL Error : " +"", "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+        catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "SQL Error : " +"", "Database Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
             e.printStackTrace();
         }
